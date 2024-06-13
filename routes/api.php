@@ -1,19 +1,25 @@
 <?php
 
+use App\Models\Url;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+Route::post('shorten', function(Request $request) {
+    $validated = $request->validate([
+        'url' => 'required',
+    ]);
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
+    $url = Url::create([
+        'original_url' => $validated['url']
+    ]);
+
+    return $url->short_url;
+});
+
+Route::get('/{url:short_url}', function (Url $url) {
+
+    // Increment click count
+    $url->increment('click_count');
+
+    return response()->redirectTo($url->original_url);
 });
