@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('shorten', function(Request $request) {
     $validated = $request->validate([
-        'url' => 'required',
+        'url' => 'required|url',
     ]);
 
     $url = Url::create([
@@ -21,5 +21,12 @@ Route::get('/{url:short_url}', function (Url $url) {
     // Increment click count
     $url->increment('click_count');
 
+    // redirect to the original_url
     return response()->redirectTo($url->original_url);
+});
+
+Route::get('/analytics/{url:short_url}', function(Url $url) {
+    return response()->json([
+        'click_count' => $url->click_count,
+    ]);
 });
